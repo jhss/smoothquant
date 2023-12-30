@@ -29,6 +29,7 @@ def quantize_activation_per_token_absmax(t, n_bits=8):
     scales = t.abs().max(dim=-1, keepdim=True)[0]
     q_max = 2**(n_bits-1)-1
     scales.clamp_(min=1e-5).div_(q_max)
+    print("[DEBUG] scales.shape: ", scales.shape)
     t.div_(scales).round_().mul_(scales)
     return t
 
@@ -69,6 +70,14 @@ class W8A8Linear(nn.Module):
         else:
             raise ValueError(f'Invalid act_quant: {act_quant}')
 
+        self.calibrate = False
+        self.in_outlier_axis = None
+        self.in_outlier_scale = None
+        self.out_outlier_axis = None
+        self.out_outlier_scale = None
+        #self.in_observer = 
+        #self.out_observer = 
+
         if quantize_output:
             self.output_quant_name = self.act_quant_name
             self.output_quant = self.act_quant
@@ -85,9 +94,20 @@ class W8A8Linear(nn.Module):
 
     @torch.no_grad()
     def forward(self, x):
-        q_x = self.act_quant(x)
-        y = torch.functional.F.linear(q_x, self.weight, self.bias)
-        q_y = self.output_quant(y)
+
+        if self.calibrate:
+            #self.in_observer(x)
+            y = torch.functional.F.linear(x, self.weight, self.bias)
+            #self.out_observer(x)
+        else:
+            # 1. divide x by s_e1 along specific axis
+            print("[DEBUG] x.shape: ", x.shape)
+            q_x = self.act_quant(x)
+            # 2. multiply q_x by s_e1
+            y = torch.functional.F.linear(q_x, self.weight, self.bias)
+            # 3. divide y by s_e2
+            y = self.output_quant(y)
+            # 4. multiply q_y by s_e2
         return q_y
 
     @staticmethod
