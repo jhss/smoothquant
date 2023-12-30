@@ -63,7 +63,7 @@ if __name__ == '__main__':
     train_dataset = load_dataset('lambada', split='train[:100]')
     valid_dataset = load_dataset('lambada', split='validation[:1000]')
     evaluator = Evaluator(valid_dataset, tokenizer, 'cuda')
-    model_fp16 = OPTForCausalLM.from_pretrained('facebook/opt-13b', torch_dtype=torch.float16, device_map='auto')
+    model_fp16 = OPTForCausalLM.from_pretrained('facebook/opt-13b', torch_dtype=torch.float16, device_map='cuda')
     model_w8a8 = quantize_model(model_fp16)
 
     evaluator.evaluate(model_w8a8)

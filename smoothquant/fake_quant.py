@@ -101,6 +101,11 @@ class W8A8Linear(nn.Module):
             #self.out_observer(x)
         else:
             # 1. divide x by s_e1 along specific axis
+            # [DEBUG] x.shape:  torch.Size([108, 5120])
+            # [DEBUG] x.shape:  torch.Size([108, 20480])
+            # [DEBUG] x.shape:  torch.Size([1, 108, 5120])
+            # [DEBUG] x.shape:  torch.Size([1, 108, 5120])
+            # [DEBUG] x.shape:  torch.Size([1, 108, 5120])
             print("[DEBUG] x.shape: ", x.shape)
             q_x = self.act_quant(x)
             # 2. multiply q_x by s_e1
@@ -108,7 +113,7 @@ class W8A8Linear(nn.Module):
             # 3. divide y by s_e2
             y = self.output_quant(y)
             # 4. multiply q_y by s_e2
-        return q_y
+        return y
 
     @staticmethod
     def from_float(module, weight_quant='per_channel', act_quant='per_token', quantize_output=False):
