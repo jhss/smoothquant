@@ -70,7 +70,7 @@ class W8A8Linear(nn.Module):
         else:
             raise ValueError(f'Invalid act_quant: {act_quant}')
 
-        self.calibrate = False
+        self.calibrate = True
         self.in_outlier_axis = None
         self.in_outlier_scale = None
         self.out_outlier_axis = None
@@ -96,17 +96,17 @@ class W8A8Linear(nn.Module):
     def forward(self, x):
 
         if self.calibrate:
-            #self.in_observer(x)
+            self.in_observer(x)
             y = torch.functional.F.linear(x, self.weight, self.bias)
             #self.out_observer(x)
         else:
-            # 1. divide x by s_e1 along specific axis
+            # 1. divide x by s_e1 along specific axis (last axis)
             # [DEBUG] x.shape:  torch.Size([108, 5120])
             # [DEBUG] x.shape:  torch.Size([108, 20480])
             # [DEBUG] x.shape:  torch.Size([1, 108, 5120])
             # [DEBUG] x.shape:  torch.Size([1, 108, 5120])
             # [DEBUG] x.shape:  torch.Size([1, 108, 5120])
-            print("[DEBUG] x.shape: ", x.shape)
+            #print("[DEBUG] x.shape: ", x.shape)
             q_x = self.act_quant(x)
             # 2. multiply q_x by s_e1
             y = torch.functional.F.linear(q_x, self.weight, self.bias)
