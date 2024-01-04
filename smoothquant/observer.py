@@ -8,6 +8,7 @@ class OutlierObserver(nn.Module):
         self.threshold = threshold
 
     def forward(self, x):
+        print("[DEBUG] outlier forward")
         if len(x.shape) == 3:
             cur_mu = torch.mean(x.detach().cpu().squeeze(0), dim=0)
             self.mu = (self.mu * self.num_total + cur_mu * x.shape[1]) / (self.num_total + x.shape[1])

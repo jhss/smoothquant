@@ -61,8 +61,9 @@ class Evaluator:
     def calibrate(self, model):
         model.eval()
 
-        for batch in self.calib_dataset:
-            input_ids = batch['input_ids'].to(self.device).unsqueeze(0)
+        for idx, batch in enumerate(self.calib_dataset):
+            print("[DEBUG] forward idx: ", idx)
+            input_ids = batch['input_ids'].cuda().unsqueeze(0)
             model(input_ids)
 
 def set_outlier_axis(model):
@@ -82,8 +83,8 @@ if __name__ == '__main__':
     train_dataset = load_dataset('lambada', split='train[:100]')
     valid_dataset = load_dataset('lambada', split='validation[:1000]')
     evaluator = Evaluator(train_dataset, valid_dataset, tokenizer, 'cuda')
-    model_fp16 = OPTForCausalLM.from_pretrained('facebook/opt-13b', torch_dtype=torch.float16, device_map='cuda')
-    model_w8a8 = quantize_model(model_fp16, act_quant='per_token')
+    model_fp16 = OPTForCausalLM.from_pretrained('facebook/opt-13b', torch_dtype=torch.float16, device_map='auto')
+    model_w8a8 = quantize_model(model_fp16, act_quant='per_tensor')
 
     evaluator.calibrate(model_w8a8)
     # For calibration dataset, calculate outlier axis and scale

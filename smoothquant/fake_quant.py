@@ -96,7 +96,7 @@ class W8A8Linear(nn.Module):
     def forward(self, x):
 
         if self.calibrate:
-            self.in_observer(x)
+            #self.in_observer(x)
             y = torch.functional.F.linear(x, self.weight, self.bias)
             #self.out_observer(x)
         else:
