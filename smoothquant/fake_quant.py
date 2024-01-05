@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from functools import partial
-
+from .observer import OutlierObserver
 
 def quantize_weight_per_channel_absmax(w, n_bits=8):
     # w: (out_features, in_features)
@@ -75,7 +75,7 @@ class W8A8Linear(nn.Module):
         self.in_outlier_scale = None
         self.out_outlier_axis = None
         self.out_outlier_scale = None
-        #self.in_observer = 
+        self.in_observer = OutlierObserver()
         #self.out_observer = 
 
         if quantize_output:
@@ -96,7 +96,8 @@ class W8A8Linear(nn.Module):
     def forward(self, x):
 
         if self.calibrate:
-            #self.in_observer(x)
+            #print("[DEBUG] calibrate")
+            self.in_observer(x)
             y = torch.functional.F.linear(x, self.weight, self.bias)
             #self.out_observer(x)
         else:

@@ -3,12 +3,13 @@ import torch.nn as nn
 
 class OutlierObserver(nn.Module):
     def __init__(self, threshold=3):
+        super().__init__()
         self.num_total = 0
         self.mu = 0.0
         self.threshold = threshold
 
     def forward(self, x):
-        print("[DEBUG] outlier forward")
+        #print("[DEBUG] outlier forward")
         if len(x.shape) == 3:
             cur_mu = torch.mean(x.detach().cpu().squeeze(0), dim=0)
             self.mu = (self.mu * self.num_total + cur_mu * x.shape[1]) / (self.num_total + x.shape[1])
@@ -26,4 +27,4 @@ class OutlierObserver(nn.Module):
         self.outlier_axis = torch.nonzero(z_score >= self.threshold)
 
         print("[DEBUG] z_score shape: ", z_score.shape)
-        print("[DEBUG] outlier_axis: ", self.outlier_axis)
+        print("[DEBUG] outlier_axis: ", self.outlier_axis, " length: ", len(self.outlier_axis))
