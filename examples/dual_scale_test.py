@@ -91,7 +91,8 @@ class Evaluator:
         start = torch.cuda.Event(enable_timing=True)
         end = torch.cuda.Event(enable_timing=True)
         latency = 0
-        for batch in self.dataset:
+        for idx, batch in enumerate(self.dataset):
+            print(f"{idx} forward")
             input_ids = batch['input_ids'].cuda().unsqueeze(0)
             label = input_ids[:, -1]
             pad_len = 512 - input_ids.shape[1]
